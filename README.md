@@ -30,7 +30,7 @@ card up afterwards. You manage all of it from a web page on your laptop or phone
 To be upfront: I built this with a lot of help from AI, quickly, because I needed it. I tested the
 parts that matter most (copying, checking and deleting) and there are tests for them, but treat it
 like what it is: a personal tool that might be useful to you too. If something looks off,
-[please tell me](https://github.com/ProfessorEngineergit/footage-harbor/issues/new).
+[please post an issue](https://github.com/ProfessorEngineergit/footage-harbor/issues/new).
 The interface is in German for now, because that's what I use every day.
 
 ## What it does
