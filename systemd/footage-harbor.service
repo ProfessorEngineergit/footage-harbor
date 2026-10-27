@@ -1,0 +1,21 @@
+[Unit]
+Description=Footage Harbor – SD card backup station
+After=network-online.target local-fs.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=@APP@
+Environment=FH_PORT=@PORT@
+Environment=FH_DATA=@DATA@
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/bin/python3 -m footage_harbor
+Restart=always
+RestartSec=3
+# Mounting cards needs root. Keep the rest of the system out of reach.
+ProtectHome=read-only
+PrivateTmp=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

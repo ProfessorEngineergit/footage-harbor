@@ -1,0 +1,40 @@
+// Stroke icons, 24px grid, 1.6 stroke. Drawn for this project.
+const ICONS = (() => {
+  const s = (d, extra = "") =>
+    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" ${extra}>${d}</svg>`;
+  return {
+    logo: `<svg viewBox="0 0 32 32" fill="none"><path d="M10.5 6h7.6l3.4 3.4V21a1 1 0 0 1-1 1H10.5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1Z" fill="currentColor"/><path d="M12.5 8.5v2.6M14.6 8.5v2.6M16.7 8.5v2.6" stroke="var(--bg-2)" stroke-width="1.2" stroke-linecap="round"/><path d="M6 17.5v6.5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6.5" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round"/></svg>`,
+    station: s('<path d="M3.5 13v5.5a1.5 1.5 0 0 0 1.5 1.5h14a1.5 1.5 0 0 0 1.5-1.5V13"/><path d="M7 15V5.5A1.5 1.5 0 0 1 8.5 4H13l3 3v8"/><path d="M3.5 13h17"/>'),
+    flows: s('<rect x="3" y="4" width="6" height="5" rx="1.5"/><rect x="15" y="15" width="6" height="5" rx="1.5"/><path d="M9 6.5h3a2 2 0 0 1 2 2v7a2 2 0 0 0 2 2h-1"/>'),
+    cards: s('<path d="M8 3h7l4 4v12.5A1.5 1.5 0 0 1 17.5 21h-9A1.5 1.5 0 0 1 7 19.5v-15A1.5 1.5 0 0 1 8.5 3Z"/><path d="M10 6v3M12.5 6v3M15 7v2"/>'),
+    storage: s('<rect x="3.5" y="4" width="17" height="7" rx="2"/><rect x="3.5" y="13" width="17" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/>'),
+    history: s('<path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4.5V8h3.5"/><path d="M12 8v4.5l3 1.8"/>'),
+    settings: s('<path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/>'),
+    trigger: s('<path d="M9 3h6l3 3v6"/><path d="M6 12V4.5A1.5 1.5 0 0 1 7.5 3H9"/><path d="M4 15v4.5A1.5 1.5 0 0 0 5.5 21h13a1.5 1.5 0 0 0 1.5-1.5V15"/><path d="M12 8v8m-3-3 3 3 3-3"/>'),
+    filter: s('<path d="M4 5h16l-6 7.5V19l-4-2v-4.5L4 5Z"/>'),
+    condition: s('<circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="12" cy="19" r="2"/><path d="M6 8v1a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V8M12 12v5"/>'),
+    backup: s('<path d="M12 3v11m-4-4 4 4 4-4"/><path d="M4 14v4.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V14"/>'),
+    cloud: s('<path d="M7 18.5h10.5a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.6 9.3 4.6 4.6 0 0 0 7 18.5Z"/>'),
+    disk: s('<rect x="3.5" y="6" width="17" height="12" rx="2"/><path d="M7 14h.01M10 14h7"/>'),
+    cleanup: s('<path d="M8 3h7l4 4v12.5A1.5 1.5 0 0 1 17.5 21h-9A1.5 1.5 0 0 1 7 19.5v-15A1.5 1.5 0 0 1 8.5 3Z"/><path d="M10 13.5l2 2 3.5-4"/>'),
+    notify: s('<path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15L6 16Z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>'),
+    eject: s('<path d="M12 5 5 13h14l-7-8Z"/><path d="M5 18h14"/>'),
+    plus: s('<path d="M12 5v14M5 12h14"/>'),
+    minus: s('<path d="M5 12h14"/>'),
+    x: s('<path d="M6 6l12 12M18 6 6 18"/>'),
+    check: s('<path d="M5 12.5l4.5 4.5L19 7.5"/>'),
+    play: s('<path d="M7 5.5v13l11-6.5-11-6.5Z"/>'),
+    fit: s('<path d="M4 9V5.5A1.5 1.5 0 0 1 5.5 4H9M15 4h3.5A1.5 1.5 0 0 1 20 5.5V9M20 15v3.5a1.5 1.5 0 0 1-1.5 1.5H15M9 20H5.5A1.5 1.5 0 0 1 4 18.5V15"/>'),
+    up: s('<path d="M6 14l6-6 6 6"/>'),
+    down: s('<path d="M6 10l6 6 6-6"/>'),
+    trash: s('<path d="M4.5 7h15M10 11v6M14 11v6M6.5 7l1 12.5A1.5 1.5 0 0 0 9 21h6a1.5 1.5 0 0 0 1.5-1.5L17.5 7M9.5 7V4.5h5V7"/>'),
+    edit: s('<path d="M14.5 5.5l4 4L9 19H5v-4l9.5-9.5Z"/>'),
+    link: s('<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>'),
+    external: s('<path d="M14 4h6v6M20 4l-9 9M18 14v4.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10"/>'),
+    server: s('<rect x="4" y="4" width="16" height="7" rx="1.5"/><rect x="4" y="13" width="16" height="7" rx="1.5"/><path d="M8 7.5h.01M8 16.5h.01"/>'),
+    terminal: s('<rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M7.5 9.5l3 2.5-3 2.5M12.5 15h4"/>'),
+    duplicate: s('<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5.5A1.5 1.5 0 0 0 14.5 4h-9A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16H8"/>'),
+    menu: s('<path d="M4 7h16M4 12h16M4 17h16"/>'),
+    download: s('<path d="M12 4v11m-4-4 4 4 4-4M5 20h14"/>'),
+  };
+})();
