@@ -21,7 +21,7 @@ command -v apt-get >/dev/null || fail "This installer needs a Debian-based syste
 say "Installing system packages"
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
-apt-get install -y -qq python3 exfatprogs ntfs-3g dosfstools udisks2 curl unzip ca-certificates >/dev/null
+apt-get install -y -qq python3 exfatprogs ntfs-3g dosfstools udisks2 avahi-daemon curl unzip ca-certificates >/dev/null
 
 if ! command -v rclone >/dev/null; then
   say "Installing rclone"
