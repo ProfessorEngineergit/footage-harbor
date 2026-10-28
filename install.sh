@@ -7,7 +7,7 @@
 set -euo pipefail
 
 REPO="ProfessorEngineergit/footage-harbor"
-BRANCH="${FH_BRANCH:-main}"
+BRANCH="${FH_BRANCH:-stable}"
 APP_DIR="/opt/footage-harbor"
 DATA_DIR="/var/lib/footage-harbor"
 PORT="${FH_PORT:-80}"
@@ -21,7 +21,7 @@ command -v apt-get >/dev/null || fail "This installer needs a Debian-based syste
 say "Installing system packages"
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
-apt-get install -y -qq python3 exfatprogs ntfs-3g dosfstools udisks2 avahi-daemon curl unzip ca-certificates >/dev/null
+apt-get install -y -qq python3 git exfatprogs ntfs-3g dosfstools udisks2 avahi-daemon curl unzip ca-certificates >/dev/null
 
 if ! command -v rclone >/dev/null; then
   say "Installing rclone"
@@ -32,16 +32,23 @@ fi
 
 SRC="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd || true)"
 if [ -z "$SRC" ] || [ ! -f "$SRC/footage_harbor/__main__.py" ]; then
-  say "Downloading Footage Harbor ($BRANCH)"
+  say "Downloading Footage Harbor"
   TMP="$(mktemp -d)"
-  curl -fsSL "https://github.com/$REPO/archive/refs/heads/$BRANCH.tar.gz" | tar -xz -C "$TMP"
+  # `stable` only moves forward when the tests passed; fall back to main for a brand-new repo.
+  if ! curl -fsSL "https://github.com/$REPO/archive/refs/heads/$BRANCH.tar.gz" -o "$TMP/src.tgz" 2>/dev/null; then
+    BRANCH=main
+    curl -fsSL "https://github.com/$REPO/archive/refs/heads/$BRANCH.tar.gz" -o "$TMP/src.tgz"
+  fi
+  tar -xz -f "$TMP/src.tgz" -C "$TMP"
   SRC="$(find "$TMP" -maxdepth 1 -mindepth 1 -type d | head -n1)"
+  SHA="$(git ls-remote "https://github.com/$REPO.git" "refs/heads/$BRANCH" 2>/dev/null | cut -c1-40 || true)"
 fi
 
 say "Copying app to $APP_DIR"
 mkdir -p "$APP_DIR"
-rm -rf "$APP_DIR/footage_harbor" "$APP_DIR/web"
-cp -r "$SRC/footage_harbor" "$SRC/web" "$APP_DIR/"
+rm -rf "$APP_DIR/footage_harbor" "$APP_DIR/web" "$APP_DIR/systemd"
+cp -r "$SRC/footage_harbor" "$SRC/web" "$SRC/systemd" "$APP_DIR/"
+echo "${SHA:-unknown}" > "$APP_DIR/VERSION"
 cp "$SRC/LICENSE" "$SRC/README.md" "$SRC/install.sh" "$SRC/uninstall.sh" "$APP_DIR/" 2>/dev/null || true
 mkdir -p "$DATA_DIR"
 chmod 700 "$DATA_DIR"
@@ -55,8 +62,10 @@ fi
 say "Setting up the service"
 sed "s|@PORT@|$PORT|g; s|@APP@|$APP_DIR|g; s|@DATA@|$DATA_DIR|g" \
   "$SRC/systemd/footage-harbor.service" > /etc/systemd/system/footage-harbor.service
+sed "s|@PORT@|$PORT|g; s|@APP@|$APP_DIR|g; s|@DATA@|$DATA_DIR|g" \
+  "$SRC/systemd/footage-harbor-updater.service" > /etc/systemd/system/footage-harbor-updater.service
 systemctl daemon-reload
-systemctl enable --now footage-harbor >/dev/null 2>&1
+systemctl enable --now footage-harbor footage-harbor-updater >/dev/null 2>&1
 systemctl restart footage-harbor
 
 sleep 2

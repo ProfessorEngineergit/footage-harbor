@@ -1,0 +1,18 @@
+[Unit]
+Description=Footage Harbor auto-updater
+After=network-online.target footage-harbor.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=@APP@
+Environment=FH_APP=@APP@
+Environment=FH_DATA=@DATA@
+Environment=FH_PORT=@PORT@
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/bin/python3 -m footage_harbor.updater
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

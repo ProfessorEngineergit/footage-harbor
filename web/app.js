@@ -773,8 +773,18 @@ async function viewImport(id) {
 }
 
 // ---------------------------------------------------------------- settings
+function updateLine(up, st) {
+  const short = (v) => (v || "").slice(0, 7);
+  const parts = [`Version <span class="mono">${esc(st.version)}</span>`];
+  if (up.error) parts.push(esc(up.error));
+  else if (up.pending) parts.push(`Neue Version <span class="mono">${esc(short(up.pending))}</span> wartet`);
+  else if (up.last_check) parts.push(`Aktuell, geprüft vor ${fmtDur(Date.now() / 1000 - up.last_check)}`);
+  if (up.updated_at) parts.push(`zuletzt aktualisiert vor ${fmtDur(Date.now() / 1000 - up.updated_at)}`);
+  return parts.join(" · ");
+}
+
 async function viewSettings() {
-  const { station: st, settings: cfg } = await api("/settings");
+  const { station: st, settings: cfg, update: up } = await api("/settings");
   S.settings = cfg;
   const rows = [
     ["Rechnername", st.hostname], ["Adresse", st.addresses.join(", ") || "–"], ["Version", st.version],
@@ -809,6 +819,11 @@ async function viewSettings() {
       <div class="set-row"><div><b>Alle anderen Geräte abmelden</b><small>Nur dieser Browser bleibt angemeldet.</small></div><button class="btn sm" id="logout-all">Abmelden</button></div>
       <div class="set-row"><div><b>Dieses Gerät abmelden</b></div><button class="btn sm" id="logout">Abmelden</button></div>
     </div>
+
+    ${up.available ? `<div class="panel panel-pad" style="margin-bottom:16px"><h2>Updates</h2>
+      <div class="set-row"><div><b>Automatisch aktualisieren</b><small>Sobald auf GitHub eine neue Version fertig geprüft ist, installiert die Station sie von selbst. Läuft gerade ein Import, wartet sie damit.</small></div>${tg("auto_update", cfg.auto_update)}</div>
+      <div class="set-row"><div><b>Stand</b><small>${updateLine(up, st)}</small></div></div>
+    </div>` : ""}
 
     <div class="panel panel-pad" style="margin-bottom:16px"><h2>Daten</h2>
       <div class="set-row"><div><b>Konfiguration exportieren</b><small>Flows, Ziele, Karten und Einstellungen als JSON. Zugangsdaten zu Cloud-Konten sind nicht enthalten.</small></div><a class="btn sm" href="/api/export" download>${I("download")} Exportieren</a></div>

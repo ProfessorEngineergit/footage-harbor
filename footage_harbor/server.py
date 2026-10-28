@@ -76,12 +76,21 @@ class App:
     def settings(self):
         return {k: self.db.get(k, v) for k, v in SETTINGS.items()}
 
+    def update_status(self):
+        try:
+            with open(os.path.join(self.station.data_dir, "update.json")) as fh:
+                st = json.load(fh)
+        except (OSError, ValueError):
+            st = {}
+        st["available"] = os.path.exists(os.path.join(APP_ROOT, "systemd", "footage-harbor-updater.service"))
+        return st
+
     def setup_done(self):
         return bool(self.db.get("password"))
 
     # ---------------------------------------------------------------- info
     def station_info(self):
-        return {"name": self.db.get("station_name", "Footage Harbor"), "version": __version__,
+        return {"name": self.db.get("station_name", "Footage Harbor"), "version": installed_version(),
                 "hostname": socket.gethostname(), "addresses": _addresses(),
                 "uptime": time.time() - self.started, "backend": self.station.backend.name,
                 "rclone": self.cloud.version(), "temperature": _cpu_temp(), "dev": self.dev,
@@ -106,6 +115,17 @@ class App:
             item["stats"] = stats
             out.append(item)
         return out
+
+
+APP_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def installed_version():
+    try:
+        with open(os.path.join(APP_ROOT, "VERSION")) as fh:
+            return fh.read().strip()[:7] or __version__
+    except OSError:
+        return f"{__version__}-dev"
 
 
 def make_handler(app):
@@ -178,7 +198,8 @@ def make_handler(app):
                     return self.static(path)
                 if method != "GET" and self.headers.get("X-Harbor") != "1":
                     return self.err("Fehlender Header", 403)
-                public = {("GET", "/api/status"), ("POST", "/api/setup"), ("POST", "/api/login")}
+                public = {("GET", "/api/status"), ("POST", "/api/setup"), ("POST", "/api/login"),
+                          ("GET", "/api/internal/update-state")}
                 if (method, path) not in public and not self.authed():
                     return self.err("Nicht angemeldet", 401)
                 for m, pattern, fn in ROUTES:
@@ -558,7 +579,14 @@ def make_handler(app):
 
         # settings --------------------------------------------------------
         def api_settings(self):
-            self.json({"station": app.station_info(), "settings": app.settings()})
+            self.json({"station": app.station_info(), "settings": app.settings(), "update": app.update_status()})
+
+        def api_update_state(self):
+            # Only the updater service on this machine may ask.
+            if self.client_address[0] not in ("127.0.0.1", "::1"):
+                return self.err("Nicht erlaubt", 403)
+            busy = any(s.state in ("running", "mounting") for s in app.station.slots.values())
+            self.json({"enabled": bool(app.db.get("auto_update", True)), "busy": busy})
 
         def api_settings_save(self):
             b = self.body()
@@ -647,6 +675,7 @@ def make_handler(app):
         ("POST", r"/api/connect/([\w-]+)/save", Handler.api_connect_save),
         ("GET", r"/api/imports", Handler.api_imports),
         ("GET", r"/api/imports/(\d+)", Handler.api_import),
+        ("GET", r"/api/internal/update-state", Handler.api_update_state),
         ("GET", r"/api/settings", Handler.api_settings),
         ("PUT", r"/api/settings", Handler.api_settings_save),
         ("POST", r"/api/logout-all", Handler.api_logout_all),
@@ -656,7 +685,7 @@ def make_handler(app):
     return Handler
 
 
-SETTINGS = {"bwlimit": "", "notify_url": "", "notify_on": "all", "include_hidden": False,
+SETTINGS = {"auto_update": True, "bwlimit": "", "notify_url": "", "notify_on": "all", "include_hidden": False,
             "default_template": DEFAULT_TEMPLATE}
 REPO_URL = "https://github.com/ProfessorEngineergit/footage-harbor"
 
